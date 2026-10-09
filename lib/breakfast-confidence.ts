@@ -16,3 +16,11 @@ export function breakfastDisclosure(confidence:BreakfastConfidence):string{
   default:return "Breakfast service not established.";
  }
 }
+
+export function breakfastScore(place:PlaceForIntent & {distance?:number;hoursAssessment?:{state:string}}):number{
+ const confidence=breakfastConfidence(place);
+ const evidence={explicit:90,likely:65,possible:35,unlikely:0}[confidence];
+ const distanceBonus=place.distance===undefined?0:Math.max(0,15-Math.min(15,place.distance*3));
+ const hoursBonus=place.hoursAssessment?.state==="likely_open"?5:0;
+ return evidence+distanceBonus+hoursBonus;
+}
