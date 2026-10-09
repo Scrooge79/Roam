@@ -1,3 +1,4 @@
+import {summarizeCoverage} from "../../../lib/coverage";
 import {makeDiagnostics} from "../../../lib/discovery-diagnostics";
 import tzlookup from "tz-lookup";
 import {assessOpeningHours} from "../../../lib/opening-hours";
@@ -28,7 +29,8 @@ export async function GET(req:NextRequest){
   }
   const assessedPlaces=places.map(place=>{let timezone:string|null=null;try{timezone=tzlookup(place.latitude,place.longitude)}catch{}return {...place,hoursAssessment:assessOpeningHours(place.openingHours,timezone)};});
   const retrievedAt=new Date().toISOString();const diagnostics=makeDiagnostics(assessedPlaces.length,events.length,warnings,retrievedAt);
-  const body={places:assessedPlaces,events,warnings,retrievedAt,location:{lat,lng},diagnostics};
+  const coverage=summarizeCoverage(assessedPlaces,events,warnings);
+  const body={places:assessedPlaces,events,warnings,retrievedAt,location:{lat,lng},diagnostics,coverage};
   return NextResponse.json(body,{headers:{"Cache-Control":"public, s-maxage=300, stale-while-revalidate=600"}});
  }finally{clearTimeout(timeout)}
 }
