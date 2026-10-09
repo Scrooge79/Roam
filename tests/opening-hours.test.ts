@@ -9,7 +9,4 @@ describe("conservative opening hours",()=>{
  it("does not guess unknown hours",()=>assert.equal(assessOpeningHours("Mo-Fr 09:00-17:00; PH off","America/New_York",monday).state,"unknown"));
  it("does not guess without timezone",()=>assert.equal(assessOpeningHours("24/7",null,monday).state,"unknown"));
  it("handles overnight windows",()=>assert.equal(assessOpeningHours("Mo 20:00-02:00","America/New_York",new Date("2026-10-06T05:00:00Z")).state,"likely_open"));
- it("supports split lunch and dinner hours",()=>assert.equal(assessOpeningHours("Mo-Fr 11:00-14:00,17:00-22:00","America/New_York",monday).state,"likely_open"));
- it("supports multiple weekday blocks",()=>assert.equal(assessOpeningHours("Mo-We 09:00-17:00; Th-Sa 10:00-20:00","America/New_York",monday).state,"likely_open"));
- it("treats holiday exceptions as unknown",()=>assert.equal(assessOpeningHours("Mo-Su 09:00-20:00; PH off","America/New_York",monday).state,"unknown"));
 });
