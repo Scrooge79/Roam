@@ -6,6 +6,7 @@ export function GET(){
   state:"prototype",
   providers:{
    ticketmaster:{configured:Boolean(process.env.TICKETMASTER_API_KEY),status:"not_probed"},
+   googlePlaces:{configured:Boolean(process.env.GOOGLE_PLACES_API_KEY),enabled:false,status:"staged_not_active"},
    openstreetmap:{configured:true,status:"not_probed"},
    geocoding:{configured:true,status:"not_probed"},
    database:{configured:Boolean(process.env.DATABASE_URL),status:"not_probed"}
