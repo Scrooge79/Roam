@@ -1,0 +1,9 @@
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {ArrowLeft,MapPin,Compass,Info} from "lucide-react";
+import {demoListings} from "../../../lib/discovery";
+export function generateStaticParams(){return demoListings.map(item=>({id:item.id}))}
+export default async function ExperiencePage({params}:{params:Promise<{id:string}>}){
+ const {id}=await params;const item=demoListings.find(x=>x.id===id);if(!item)notFound();
+ return <main className="gradient min-h-screen"><header className="mx-auto max-w-4xl px-5 py-6 flex items-center justify-between"><Link href="/" className="font-black text-2xl flex items-center gap-2"><Compass className="text-violet-400"/>roam.</Link><Link href="/" className="text-sm text-violet-300 flex items-center gap-2"><ArrowLeft size={16}/>Explore</Link></header><article className="mx-auto max-w-4xl px-5 pb-20"><div className="h-64 md:h-80 rounded-3xl flex items-center justify-center text-8xl" style={{background:item.image}}>{item.emoji}</div><div className="mt-8 text-violet-300 text-sm">{item.category} · {item.price}</div><h1 className="text-4xl md:text-5xl font-bold mt-3">{item.name}</h1><p className="text-lg text-slate-300 mt-5">{item.description}</p><div className="flex items-center gap-2 text-slate-400 mt-5"><MapPin size={17}/>{item.neighborhood}</div><div className="flex flex-wrap gap-2 mt-6">{item.tags.map(t=><span key={t} className="pill text-sm">{t}</span>)}</div><section className="glass p-5 rounded-2xl mt-10"><h2 className="font-bold flex gap-2 items-center"><Info size={19}/> Inspiration preview</h2><p className="text-slate-300 text-sm mt-3">This is a sample experience category, not a real business listing. Address, opening hours, tickets, availability and directions will be provided only for verified places and events.</p></section><Link href="/" className="inline-flex mt-8 text-violet-300 gap-2 items-center"><ArrowLeft size={16}/>Back to discovery</Link></article></main>;
+}
