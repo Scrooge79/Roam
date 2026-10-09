@@ -1,3 +1,4 @@
+import {sourcePhoto} from "../../../lib/venue-photo";
 import {NextRequest,NextResponse} from "next/server";
 export const dynamic="force-dynamic";
 type OsmElement={type:string;id:number;lat?:number;lon?:number;center?:{lat:number;lon:number};tags?:Record<string,string>};
@@ -17,7 +18,7 @@ export async function GET(req:NextRequest){
    const t=x.tags??{},a=t.amenity??t.shop??t.leisure??t.tourism??"attraction",latitude=x.lat??x.center?.lat,longitude=x.lon??x.center?.lon;
    if(latitude===undefined||longitude===undefined)return null;
    const category=["restaurant","cafe","bakery","fast_food"].includes(a)?"Food & Drink":["bar","pub","nightclub"].includes(a)?"Nightlife":["museum","gallery","attraction"].includes(a)?"Attractions":"Activities";
-   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,cuisine:t.cuisine??null,breakfast:t.breakfast??null,lastFetchedAt:fetchedAt,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
+   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,cuisine:t.cuisine??null,breakfast:t.breakfast??null,image:sourcePhoto(t),lastFetchedAt:fetchedAt,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
   }).filter(Boolean);
   return NextResponse.json({source:"OpenStreetMap contributors",attribution:"© OpenStreetMap contributors",verifiedOpenNow:false,retrievedAt:fetchedAt,places:items},{headers:{"Cache-Control":"public, s-maxage=1800, stale-while-revalidate=3600"}});
  }catch{return NextResponse.json({error:"Places provider timed out or unavailable"},{status:503})}
