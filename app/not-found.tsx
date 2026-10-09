@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound(){return <main className="gradient min-h-screen flex items-center justify-center p-6"><div className="text-center"><div className="text-6xl mb-5">🧭</div><h1 className="text-4xl font-bold">This trail ends here.</h1><p className="text-slate-400 mt-3">We couldn't find that experience.</p><Link href="/" className="inline-block mt-7 bg-violet-400 text-slate-950 px-6 py-3 rounded-xl font-bold">Explore ROAM</Link></div></main>}
