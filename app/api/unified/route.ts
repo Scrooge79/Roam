@@ -1,3 +1,4 @@
+import {makeDiagnostics} from "../../../lib/discovery-diagnostics";
 import tzlookup from "tz-lookup";
 import {assessOpeningHours} from "../../../lib/opening-hours";
 import {NextRequest,NextResponse} from "next/server";
@@ -26,7 +27,8 @@ export async function GET(req:NextRequest){
    else{events=(Array.isArray(d.events)?d.events:[]).map(cleanEvent).filter((x:DiscoveryResponse["events"][number]|null):x is DiscoveryResponse["events"][number]=>x!==null);if(d.configured===false)warnings.push("Events provider not configured")}
   }
   const assessedPlaces=places.map(place=>{let timezone:string|null=null;try{timezone=tzlookup(place.latitude,place.longitude)}catch{}return {...place,hoursAssessment:assessOpeningHours(place.openingHours,timezone)};});
-  const body={places:assessedPlaces,events,warnings,retrievedAt:new Date().toISOString(),location:{lat,lng}};
+  const retrievedAt=new Date().toISOString();const diagnostics=makeDiagnostics(assessedPlaces.length,events.length,warnings,retrievedAt);
+  const body={places:assessedPlaces,events,warnings,retrievedAt,location:{lat,lng},diagnostics};
   return NextResponse.json(body,{headers:{"Cache-Control":"public, s-maxage=300, stale-while-revalidate=600"}});
  }finally{clearTimeout(timeout)}
 }
