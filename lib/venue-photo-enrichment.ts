@@ -1,6 +1,6 @@
 import {sourcePhoto} from "./venue-photo";
 type Tags=Record<string,string>;
-type WikidataEntity={claims?:{P18?:Array<{mainsnak?:{datavalue?:{value?:unknown}}}>}}};
+type WikidataEntity={claims?:{P18?:Array<{mainsnak?:{datavalue?:{value?:unknown}}}>}};
 const wikidataId=(value:string|undefined)=>value&&/^Q[1-9][0-9]{0,11}$/.test(value)?value:null;
 /** Optional, bounded enrichment; an upstream failure must never block place discovery. */
 export async function enrichVenuePhotos<T extends {tags?:Tags}>(elements:T[]):Promise<Map<string,string>>{
