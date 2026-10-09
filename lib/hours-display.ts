@@ -20,7 +20,7 @@ export function formatMappedHours(raw:string|null|undefined):string|null{
  for(const part of parts){
   const match=/^(?:(?<days>(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?(?:,(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su)))*)\s+)?(?<times>\d{1,2}:\d{2}-\d{1,2}:\d{2}(?:,\d{1,2}:\d{2}-\d{1,2}:\d{2})*)$/.exec(part);
   if(!match?.groups)return null;
-  const days=(match.groups.days||"Daily").replace(/Mo|Tu|We|Th|Fr|Sa|Su/g,d=>DAYS[d]);
+  const days=(match.groups.days||"Daily").replace(/Mo|Tu|We|Th|Fr|Sa|Su/g,(day:string)=>DAYS[day]??day);
   const times=match.groups.times.split(",").map(t=>{const [a,b]=t.split("-");return formatClock(a)+" – "+formatClock(b)}).join(", ");
   output.push(days+": "+times);
  }
