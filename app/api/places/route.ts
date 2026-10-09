@@ -13,12 +13,12 @@ export async function GET(req:NextRequest){
   let response:Response;
   try{response=await fetch("https://overpass.kumi.systems/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"RoamDiscoveryPrototype/0.1 (OpenStreetMap attribution in UI)"},body:new URLSearchParams({data:query}),signal:controller.signal,next:{revalidate:1800}})}finally{clearTimeout(timeout)}
   if(!response.ok)return NextResponse.json({error:"Places provider temporarily unavailable"},{status:503});
-  const json=await response.json();const items=(json.elements??[] as OsmElement[]).filter((x:OsmElement)=>x.tags?.name).map((x:OsmElement)=>{
+  const json=await response.json();const fetchedAt=new Date().toISOString();const items=(json.elements??[] as OsmElement[]).filter((x:OsmElement)=>x.tags?.name).map((x:OsmElement)=>{
    const t=x.tags??{},a=t.amenity??t.leisure??t.tourism??"attraction",latitude=x.lat??x.center?.lat,longitude=x.lon??x.center?.lon;
    if(latitude===undefined||longitude===undefined)return null;
    const category=["restaurant","cafe","fast_food"].includes(a)?"Food & Drink":["bar","pub","nightclub"].includes(a)?"Nightlife":["museum","gallery","attraction"].includes(a)?"Attractions":"Activities";
-   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
+   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,lastFetchedAt:fetchedAt,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
   }).filter(Boolean);
-  return NextResponse.json({source:"OpenStreetMap contributors",attribution:"© OpenStreetMap contributors",verifiedOpenNow:false,places:items},{headers:{"Cache-Control":"public, s-maxage=1800, stale-while-revalidate=3600"}});
+  return NextResponse.json({source:"OpenStreetMap contributors",attribution:"© OpenStreetMap contributors",verifiedOpenNow:false,retrievedAt:fetchedAt,places:items},{headers:{"Cache-Control":"public, s-maxage=1800, stale-while-revalidate=3600"}});
  }catch{return NextResponse.json({error:"Places provider timed out or unavailable"},{status:503})}
 }
