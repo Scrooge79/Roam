@@ -17,8 +17,8 @@ export async function GET(req:NextRequest){
    const result=results[i],provider=i===0?"places":"events";
    if(result.status==="rejected"){warnings.push(provider+" provider unavailable");continue}
    const d=result.value.data;
-   if(provider==="places")places=(Array.isArray(d.places)?d.places:[]).map(cleanPlace).filter(Boolean);
-   else{events=(Array.isArray(d.events)?d.events:[]).map(cleanEvent).filter(Boolean);if(d.configured===false)warnings.push("Events provider not configured")}
+   if(provider==="places")places=(Array.isArray(d.places)?d.places:[]).map(cleanPlace).filter((x:DiscoveryResponse["places"][number]|null):x is DiscoveryResponse["places"][number]=>x!==null);
+   else{events=(Array.isArray(d.events)?d.events:[]).map(cleanEvent).filter((x:DiscoveryResponse["events"][number]|null):x is DiscoveryResponse["events"][number]=>x!==null);if(d.configured===false)warnings.push("Events provider not configured")}
   }
   const body:DiscoveryResponse={places,events,warnings,retrievedAt:new Date().toISOString(),location:{lat,lng}};
   return NextResponse.json(body,{headers:{"Cache-Control":"public, s-maxage=300, stale-while-revalidate=600"}});
