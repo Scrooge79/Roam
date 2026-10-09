@@ -4,11 +4,14 @@ export const dynamic="force-dynamic";
 export async function GET(req:NextRequest){
  const lat=Number(req.nextUrl.searchParams.get("lat")),lng=Number(req.nextUrl.searchParams.get("lng"));
  if(!req.nextUrl.searchParams.has("lat")||!req.nextUrl.searchParams.has("lng")||!validLocation(lat,lng))return NextResponse.json({error:"Valid latitude and longitude required"},{status:400});
+ const radiusValue=Number(req.nextUrl.searchParams.get("radius")??1800);
+ if(!Number.isFinite(radiusValue)||radiusValue<250||radiusValue>3000)return NextResponse.json({error:"Radius must be between 250 and 3000 meters"},{status:400});
  const base=req.nextUrl.origin;const params=new URLSearchParams({lat:String(lat),lng:String(lng)});
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),26000);
  try{
   const results=await Promise.allSettled(["places","events"].map(async name=>{
-   const res=await fetch(base+"/api/"+name+"?"+params.toString(),{signal:controller.signal,headers:{"Accept":"application/json"},next:{revalidate:300}});
+   const providerParams=new URLSearchParams(params);if(name==="places")providerParams.set("radius",String(radiusValue));
+   const res=await fetch(base+"/api/"+name+"?"+providerParams.toString(),{signal:controller.signal,headers:{"Accept":"application/json"},next:{revalidate:300}});
    if(!res.ok)throw Error(name+" unavailable");
    return {name,data:await res.json()};
   }));
