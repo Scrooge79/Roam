@@ -1,3 +1,5 @@
+import tzlookup from "tz-lookup";
+import {assessOpeningHours} from "../../../lib/opening-hours";
 import {NextRequest,NextResponse} from "next/server";
 import {cleanEvent,cleanPlace,validLocation,type DiscoveryResponse} from "../../../lib/provider-types";
 export const dynamic="force-dynamic";
@@ -23,7 +25,8 @@ export async function GET(req:NextRequest){
    if(provider==="places")places=(Array.isArray(d.places)?d.places:[]).map(cleanPlace).filter((x:DiscoveryResponse["places"][number]|null):x is DiscoveryResponse["places"][number]=>x!==null);
    else{events=(Array.isArray(d.events)?d.events:[]).map(cleanEvent).filter((x:DiscoveryResponse["events"][number]|null):x is DiscoveryResponse["events"][number]=>x!==null);if(d.configured===false)warnings.push("Events provider not configured")}
   }
-  const body:DiscoveryResponse={places,events,warnings,retrievedAt:new Date().toISOString(),location:{lat,lng}};
+  const assessedPlaces=places.map(place=>{let timezone:string|null=null;try{timezone=tzlookup(place.latitude,place.longitude)}catch{}return {...place,hoursAssessment:assessOpeningHours(place.openingHours,timezone)};});
+  const body={places:assessedPlaces,events,warnings,retrievedAt:new Date().toISOString(),location:{lat,lng}};
   return NextResponse.json(body,{headers:{"Cache-Control":"public, s-maxage=300, stale-while-revalidate=600"}});
  }finally{clearTimeout(timeout)}
 }
