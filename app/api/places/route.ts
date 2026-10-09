@@ -7,7 +7,7 @@ export async function GET(req:NextRequest){
  const lat=numberInRange(q.get("lat"),-90,90),lng=numberInRange(q.get("lng"),-180,180);
  if(lat===null||lng===null)return NextResponse.json({error:"Valid coordinates required"},{status:400});
  const radius=numberInRange(q.get("radius"),250,3000)??1800;
- const query=`[out:json][timeout:18];(nwr(around:${Math.round(radius)},${lat},${lng})["amenity"~"^(restaurant|cafe|bar|pub|fast_food|cinema|theatre|arts_centre|nightclub)$"];nwr(around:${Math.round(radius)},${lat},${lng})["leisure"~"^(bowling_alley|fitness_centre|escape_game|miniature_golf)$"];nwr(around:${Math.round(radius)},${lat},${lng})["tourism"~"^(museum|gallery|attraction)$"];);out center 90;`;
+ const query=`[out:json][timeout:18];(nwr(around:${Math.round(radius)},${lat},${lng})["amenity"~"^(restaurant|cafe|bakery|bar|pub|fast_food|cinema|theatre|arts_centre|nightclub)$"];nwr(around:${Math.round(radius)},${lat},${lng})["leisure"~"^(bowling_alley|fitness_centre|escape_game|miniature_golf)$"];nwr(around:${Math.round(radius)},${lat},${lng})["tourism"~"^(museum|gallery|attraction)$"];);out center 90;`;
  try{
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),23000);
   let response:Response;
@@ -16,8 +16,8 @@ export async function GET(req:NextRequest){
   const json=await response.json();const fetchedAt=new Date().toISOString();const items=(json.elements??[] as OsmElement[]).filter((x:OsmElement)=>x.tags?.name).map((x:OsmElement)=>{
    const t=x.tags??{},a=t.amenity??t.leisure??t.tourism??"attraction",latitude=x.lat??x.center?.lat,longitude=x.lon??x.center?.lon;
    if(latitude===undefined||longitude===undefined)return null;
-   const category=["restaurant","cafe","fast_food"].includes(a)?"Food & Drink":["bar","pub","nightclub"].includes(a)?"Nightlife":["museum","gallery","attraction"].includes(a)?"Attractions":"Activities";
-   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,lastFetchedAt:fetchedAt,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
+   const category=["restaurant","cafe","bakery","fast_food"].includes(a)?"Food & Drink":["bar","pub","nightclub"].includes(a)?"Nightlife":["museum","gallery","attraction"].includes(a)?"Attractions":"Activities";
+   return {id:`${x.type}:${x.id}`,name:t.name,category,latitude,longitude,address:[t["addr:housenumber"],t["addr:street"]].filter(Boolean).join(" ")||null,website:t.website??t["contact:website"]??null,openingHours:t.opening_hours??null,cuisine:t.cuisine??null,breakfast:t.breakfast??null,lastFetchedAt:fetchedAt,sourceUrl:`https://www.openstreetmap.org/${x.type}/${x.id}`};
   }).filter(Boolean);
   return NextResponse.json({source:"OpenStreetMap contributors",attribution:"© OpenStreetMap contributors",verifiedOpenNow:false,retrievedAt:fetchedAt,places:items},{headers:{"Cache-Control":"public, s-maxage=1800, stale-while-revalidate=3600"}});
  }catch{return NextResponse.json({error:"Places provider timed out or unavailable"},{status:503})}
